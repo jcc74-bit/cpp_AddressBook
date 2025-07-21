@@ -1,0 +1,478 @@
+#include <iostream>
+#include <vector>
+#include<fstream>
+using namespace std;
+
+class Name {
+public:
+	string fName;
+	string mName;
+	string lName;
+
+	Name() {}
+	Name(string fName, string mName, string lName) {
+		this->fName = fName;
+		this->mName = mName;
+		this->lName = lName;
+	}
+	Name(string fName, string lName) {
+		this->fName = fName;
+		this->lName = lName;
+		mName = "";
+	}
+
+	Name(string fullName) {
+		//trims spaces and lines
+		fullName.erase(fullName.find_last_not_of("\r") + 1);
+
+		int spaceCount = 0;
+		for (char c : fullName) {
+			if (c == ' ')
+				spaceCount++;
+		}
+
+		if (spaceCount == 1) {
+			int spaceIndex = fullName.find(" ");
+			fName = fullName.substr(0, spaceIndex);
+			lName = fullName.substr(spaceIndex + 1);
+			mName = "";
+		} else if (spaceCount == 2) {
+			int spaceIndex1 = fullName.find(" ");
+			int spaceIndex2 = fullName.find(" ", spaceIndex1 + 1);
+			fName = fullName.substr(0, spaceIndex1);
+			mName = fullName.substr(spaceIndex1 + 1, spaceIndex2 - spaceIndex1 - 1);
+			lName = fullName.substr(spaceIndex2 + 1);
+		}
+	}
+
+	void display() {
+		cout << lName << ", " << fName << " " << mName << "\n";
+	}
+};
+
+class Address {
+public:
+	// attributes
+	string houseNumber;
+	string streetName;
+	string city;
+	string state;
+	string zip;
+	string country;
+
+	// Create the constructors
+	// 1. default
+	Address() {}
+
+	Address(string houseNumber, string streetName, string city, string state, string zip, string country) {
+		this -> houseNumber = houseNumber;
+		this -> streetName =streetName;
+		this -> city = city;
+		this -> state = state;
+		this -> zip = zip;
+		this -> country = country;
+	}
+
+	// overload with a single full address string:
+	Address(string fullAddress) {
+		int SpaceIndex = fullAddress.find(" ");
+		int commaIndex1 = fullAddress.find(",");
+		int commaIndex2 = fullAddress.find(",",commaIndex1+1);
+		int commaIndex3 = fullAddress.find(",",commaIndex2+1);
+		int dashIndex = fullAddress.find("-",commaIndex3+1);
+
+		houseNumber = fullAddress.substr(0,SpaceIndex);
+		streetName = fullAddress.substr(SpaceIndex + 1, commaIndex1 - SpaceIndex - 1);
+		city = fullAddress.substr(commaIndex1 + 2,commaIndex2 - commaIndex1 - 2);
+		state = fullAddress.substr(commaIndex2 + 2, commaIndex3 - commaIndex2 - 2);
+		zip = fullAddress.substr(commaIndex3 + 2, 6);
+		country = fullAddress.substr(dashIndex + 2);
+	}
+
+	// Assign all attributes respectively
+	void display() {
+		cout << houseNumber << " " << streetName << endl;
+		cout << city << ", " << state << " " << zip << endl;
+		cout << country << endl;
+		cout << endl;
+	}
+};
+
+class Contact {
+private:
+	Name name;
+	string phoneNumber;
+	string email;
+	string address;
+
+public:
+	Contact() {
+	}
+
+	Contact(Name name, string phoneNumber, string email, Address address) {
+		this->name = name;
+		this->phoneNumber = phoneNumber;
+		this->email = email;
+		this->address = address.houseNumber + " " + address.streetName + "\n" +
+		                address.city + ", " + address.state + " " + address.zip + "\n" +
+		                address.country;
+	}
+
+
+	void display() {
+		name.display();
+		cout << address <<endl;
+		cout << phoneNumber <<endl;
+		cout << email <<endl;
+		cout <<endl;
+	}
+
+	Name getName() {
+		return name;
+	}
+	string getPhoneNumber() {
+		return phoneNumber;
+	}
+	string getEmail() {
+		return email;
+	}
+	string getAddress() {
+		return address;
+	}
+
+	void setName(Name n) {
+		name = n;
+	}
+	void setPhoneNumber(string p) {
+		phoneNumber = p;
+	}
+	void setEmail(string e) {
+		email = e;
+	}
+	void setAddress(string a) {
+		address = a;
+	}
+
+};
+
+class AddressBook {
+//private:
+//	vector<Contact> contactList;
+public:
+	vector<Contact> contactList;
+	AddressBook() {}
+	AddressBook(vector<Contact> c) {
+		contactList = c;
+	}
+	void addContact(Contact c) {
+		contactList.push_back(c);
+	}
+	void addContact(string n, string p, string e, string a) {
+		Contact temp(n,p,e,a);
+		contactList.push_back(temp);
+	}
+
+	//bubble sort
+	void sortlName() {
+		for (int i = 0; i < contactList.size() - 1; i++) {
+			for (int j = 0; j < contactList.size() - i - 1; j++) {
+				if (contactList[j].getName().lName > contactList[j + 1].getName().lName) {
+					// Swap the two contacts
+					Contact temp = contactList[j];
+					contactList[j] = contactList[j + 1];
+					contactList[j + 1] = temp;
+				}
+				//if lName same, check fName
+				else if (contactList[j].getName().lName == contactList[j + 1].getName().lName) {
+
+					if (contactList[j].getName().fName > contactList[j + 1].getName().fName) {
+						// Swap the two contacts
+						Contact temp = contactList[j];
+						contactList[j] = contactList[j + 1];
+						contactList[j + 1] = temp;
+					}   //if lName and fName same, check mName
+					else if (contactList[j].getName().fName == contactList[j + 1].getName().fName) {
+
+						if (contactList[j].getName().mName > contactList[j + 1].getName().mName) {
+							Contact temp = contactList[j];
+							contactList[j] = contactList[j + 1];
+							contactList[j + 1] = temp;
+						}
+					}
+				}
+			}
+		}
+	}
+	void display() {
+		for(Contact tempContact: contactList) {
+			tempContact.display();
+		}
+	}
+	int getSize() {
+		return contactList.size();
+	}
+
+	void display(int index) {
+		if (index >= 0 && index < contactList.size()) {
+			contactList[index].display();
+		}
+	}
+
+	void deleteContact(int index) {
+		if (index >= 0 && index < contactList.size()) {
+			contactList.erase(contactList.begin() + index);
+		}
+	}
+};
+
+int main() {
+
+	AddressBook myBook;
+	int choice;
+
+	do {
+		// Display the menu
+		cout << "===== Address Book Menu =====" << endl;
+		cout << "1. Add New Contact" << endl;
+		cout << "2. Edit Existing Contact" << endl;
+		cout << "3. Delete Contact" << endl;
+		cout << "4. Import Address Book from File" << endl;
+		cout << "5. Export Address Book to File" << endl;
+		cout << "6. Display All Contacts" << endl;
+		cout << "7. Exit" << endl;
+		cout << endl;
+		cout << "Enter your choice: " << endl;
+
+		cin >> choice;
+
+		switch (choice) {
+		case 1: {
+			cout << "---- Add a New Contact ----" << endl;
+			string fName, mName, lName;
+			string houseNumber, street, city, state, zip, country;
+			string phone, email;
+
+			cout << "Enter First Name: ";
+			cin >> fName;
+			cout << "Enter Middle (press enter if n/a): ";
+			cin >> mName;
+			cout << "Enter Last Name: ";
+			cin >> lName;
+
+			cout << "Enter House Number: ";
+			cin >> houseNumber;
+			cout << "Enter Street Name: ";
+			cin >> street;
+			cout << "Enter City: ";
+			cin >> city;
+			cout << "Enter State: ";
+			cin >> state;
+			cout << "Enter ZIP Code: ";
+			cin >> zip;
+			cout << "Enter Country: ";
+			cin >> country;
+
+			cout << "Enter Phone Number: ";
+			cin >> phone;
+			cout << "Enter Email Address: ";
+			cin >> email;
+
+			Name newName;
+			if (mName.empty()) {
+				newName = Name(fName, lName);
+			} else {
+				newName = Name(fName, mName, lName);
+			}
+
+			Address newAddress(houseNumber, street, city, state, zip, country);
+			Contact newContact(newName, phone, email, newAddress);
+
+			myBook.addContact(newContact);
+			cout << "Contact added successfully" << endl;
+
+			break;
+		}
+
+		case 2: {
+			int editChoice;
+			cout << "---- Edit Contact ----" << endl;
+
+			if (myBook.getSize() == 0) {
+				cout << "No contacts to edit" << endl;
+			}
+
+			// Show contacts with index
+			for (int i = 0; i < myBook.getSize(); ++i) {
+				cout << i + 1 << ". ";
+				myBook.display(i);
+			}
+
+			int index;
+			cout << "Enter the number of the contact to edit: ";
+			cin >> index;
+
+			if (index < 1 || index > myBook.getSize()) {
+				cout << "Not a valid contact number." << endl;
+				break;
+			}
+
+			// menu within menu
+			cout << "What would you like to edit?" << endl;
+			cout << "1. Name" << endl;
+			cout << "2. Address" << endl;
+			cout << "3. Phone Number" << endl;
+			cout << "4. Email" << endl;
+			cout << endl;
+			cout << "Enter choice: ";
+			cin >> editChoice;
+
+			switch (editChoice) {
+			case 1: {
+				string fName, mName, lName;
+				cout << "Enter First Name: ";
+				cin >> fName;
+				cout << "Enter Middle Name (or press enter if none): ";
+				cin >> mName;
+				cout << "Enter Last Name: ";
+				cin >> lName;
+
+				if (mName.empty()) {
+					myBook.contactList[index - 1].setName(Name(fName, lName));
+				} else {
+					myBook.contactList[index - 1].setName(Name(fName, mName, lName));
+				}
+				break;
+			}
+
+			case 2: {
+				string houseNumber, street, city, state, zip, country;
+				cout << "Enter House Number: ";
+				cin >> houseNumber;
+				cout << "Enter Street Name: ";
+				cin >> street;
+				cout << "Enter City: ";
+				cin >> city;
+				cout << "Enter State: ";
+				cin >> state;
+				cout << "Enter ZIP Code: ";
+				cin >> zip;
+				cout << "Enter Country: ";
+				cin >> country;
+
+				Address newAddr(houseNumber, street, city, state, zip, country);
+				myBook.contactList[index - 1].setAddress(newAddr.houseNumber + " " + newAddr.streetName + "\n" +
+				        newAddr.city + ", " + newAddr.state + " " + newAddr.zip + "\n" +
+				        newAddr.country);
+				break;
+			}
+			case 3: {
+				string newPhone;
+				cout << "Enter new Phone Number: ";
+				cin >> newPhone;
+				myBook.contactList[index - 1].setPhoneNumber(newPhone);
+				break;
+			}
+			case 4: {
+				string newEmail;
+				cout << "Enter new Email Address: ";
+				cin >> newEmail;
+				myBook.contactList[index - 1].setEmail(newEmail);
+				break;
+			}
+			default:
+				cout << "not a valid choice." << endl;
+				break;
+			}
+
+			cout << "contact updated successfully!" << endl;
+			break;
+		}
+
+		case 3: {
+			cout << "Enter the number of the contact to edit: ";
+			int delIndex;
+			cin >> delIndex;
+
+			if (delIndex < 1 || delIndex > myBook.getSize()) {
+				cout << "not a contact." << endl;
+			}
+
+			cout << "are you sure you want to delete this contact? (n): ";
+			char confirm;
+			cin >> confirm;
+
+			if (tolower(confirm) == 'y') {
+				myBook.deleteContact(delIndex - 1);
+				cout << "contact deleted." << endl;
+			} else {
+				cout << "deletion canceled." << endl;
+			}
+			break;
+		}
+
+		case 4: {
+			ifstream fin("contactsText.txt");
+			AddressBook myBook;
+			string nameLine, addressLine, phoneLine, emailLine;
+
+			while (getline(fin, nameLine)) {
+				getline(fin, phoneLine);
+				getline(fin, addressLine);
+				getline(fin, emailLine);
+
+				Name n(nameLine);
+				Address a(addressLine);
+				Contact c(n, phoneLine, emailLine, a);
+				myBook.addContact(c);
+			}
+			
+			fin.close();
+			cout << "contacts are imported." << endl;
+			break;
+		}
+
+		case 5: {
+			string fileName;
+			cout << "===== Input Into New File =====" << endl;
+			cout << "What's the file name? ";
+			cin >> fileName;
+
+			ofstream fout(fileName);
+
+			for (int i = 0; i < myBook.getSize(); i++) {
+				Name n = myBook.contactList[i].getName();
+				fout << n.fName << " " << n.mName << " " << n.lName << endl;
+				fout << myBook.contactList[i].getPhoneNumber() << endl;
+				fout << myBook.contactList[i].getAddress() << endl;
+				fout << myBook.contactList[i].getEmail() << endl;
+			}
+
+			fout.close();
+			cout << "contacts are exported." << endl;
+			break;
+		}
+
+		case 6: {
+			cout << "===== Address Book Display =====" << endl;
+			myBook.sortlName();
+			myBook.display();
+			break;
+		}
+
+		case 7: {
+			cout << "exited address book." << endl;
+			break;
+		}
+
+		default:
+			cout << "not an option, retry" << endl;
+			break;
+		}
+	}
+	
+	while (choice != 7);
+}
+
+
+
+
