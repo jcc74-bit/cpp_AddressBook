@@ -1,0 +1,249 @@
+#include <iostream>
+using namespace std;
+
+class Person {
+private:
+	string name;
+	int age;
+	string gender;
+
+public:
+	string getName() {
+		return name;
+	}
+	int getAge() {
+		return age;
+	}
+
+	string getGender() {
+		return gender;
+	}
+
+	Person() {
+	}
+
+	Person(string n, int a, string g) {
+		name = n;
+		age = a;
+		gender = g;
+	}
+
+	virtual void displayInfo() { // The virtual keyword indicates that this method can have different version by subclasses
+		cout << "Name: " << name<<endl;
+		cout << "Age: " << age<<endl;
+		cout << "Gender: " << gender<<endl;
+	}
+
+};
+
+class Student : public Person {
+private:
+	string studentID;
+	string major;
+	double gpa;
+
+public:
+	Student() {}
+
+	Student(string n, int a, string g, string id, string m, double gpa) : Person(n,a,g) {
+		studentID = id;
+		major = m;
+		this->gpa = gpa;
+	}
+
+	bool isHonorStudent() {
+		if (gpa > 3.5) {
+			cout << getName() << " is an honor student." << endl;
+			return true;
+		}
+		return false;
+	}
+
+	// Overriding
+	void displayInfo() override { // The override keyword indicates that this version takes over during any polymorphic calls.
+		cout << endl;
+		Person::displayInfo(); // calls the parent's version of displayInfo()
+		cout << "Student ID: " << studentID<<endl;
+		cout << "Major: " << major<<endl;
+		cout << "GPA: " << gpa<<endl;
+		isHonorStudent();
+		cout << endl;
+	}
+
+};
+
+class Staff : public Person {
+private:
+	string ID;
+	string position;
+
+public:
+	Staff() {}
+
+	Staff(string name, int age, string gender, string id, string pos)
+		: Person(name, age, gender) {
+		ID = id;
+		position = pos;
+	}
+
+	void displayInfo() override {
+		Person::displayInfo();
+		cout << "Employee ID: " << ID << endl;
+		cout << "Position: " << position << endl;
+		cout << endl;
+	}
+};
+
+class Teacher : public Person {
+private:
+	string employeeID;
+	string department;
+	string courses[5];
+	int courseCount;
+
+public:
+	Teacher() : courseCount(0) {}
+
+	Teacher(string name, int age, string gender, string empID, string dept)
+		: Person(name, age, gender), employeeID(empID), department(dept), courseCount(0) {}
+
+	void addCourse(string courseName) {
+		if (courseCount < 5) {
+			courses[courseCount++] = courseName;
+		} else {
+			cout << "Teacher teaches max of 5 courses." << endl;
+		}
+	}
+
+	void displayInfo() override {
+		Person::displayInfo();
+		cout << "Employee ID: " << employeeID << endl;
+		cout << "Department: " << department << endl;
+		cout << "Courses Taught: ";
+		for (int i = 0; i < 5; i++) {
+			cout << courses[i];
+			if (i < courseCount - 1) cout << ", ";
+		}
+		cout << endl << endl;
+	}
+};
+
+class AdminStaff : public Person {
+private:
+	string officeNumber;
+	int adminLevel;
+
+public:
+	AdminStaff() {}
+
+	AdminStaff(string name, int age, string gender, string empID, string position, string officeNum, int level)
+		: Person(name, age, gender), officeNumber(officeNum), adminLevel(level) {}
+
+	void promote() {
+		if (adminLevel < 5) {
+			adminLevel++;
+			cout << "New Admin Level: " << adminLevel << endl;
+		} else {
+			cout << "Admin Level is at max (5)." << endl;
+		}
+	}
+
+	void displayInfo() override {
+		Person::displayInfo();
+		cout << "Office Number: " << officeNumber << endl;
+		cout << "Admin Level: " << adminLevel << endl;
+		cout << endl;
+	}
+};
+
+int main() {
+
+	/*
+		Person p1("PeeWee", 21, "male");
+		Student me("Kyle", 25, "male", "123456789", "Jedi Master", 3.6);
+		//Teacher mathTeacher(/.....);
+
+		// Pointers are like labels of a package
+		Person*  roster[5]; // Roster is an array of 5 blank "labels" that only associates with Person objects
+		roster[0] = &p1;	// assigning the first "label" with the address(&) of a Person p1
+		roster[1] = &me;	// assigning the second "label" with the address(&) of a Person type Student object me
+		//roster[2] = &mathTeacher;
+
+		for(int i = 0; i < 2; i++) {
+			roster[i]->displayInfo(); // the -> operator indicates to use the method of this pointer
+			// The "->" operator behaves like the "." operator, except it's for POINTERS
+		}
+
+		// To further demonstrate Polymorphism:
+		Person* mrChan = new Person("Kevin Chan", 25, "male");
+		mrChan->displayInfo();
+
+		mrChan = new Student("Kevin Chan", 25, "male", "6546545", "CS", 3.6);
+		mrChan->displayInfo();
+
+		mrChan = new Staff(mrChan, "E123456","Teacher");
+		mrChan -> displayInfo();
+
+	*/
+
+	Person p1("PeeWee", 21, "male");
+	Student me("Kyle", 25, "male", "123456789", "engineering", 3.6);
+	Staff sf("Muhsen", 23, "male", "E8419040", "dean");
+	Teacher tc("MrChan", 20, "male", "SHJ2172", "Math");
+	AdminStaff adsf("Marmor", 30, "Male", "608", "Admin", "Room 204", 4);
+
+	tc.addCourse("APCSA");
+	tc.addCourse("CPP");
+	tc.addCourse("Python");
+
+	adsf.promote();
+
+	Person* roster[5];
+	roster[0] = &p1;
+	roster[1] = &me;
+	roster[2] = &sf;
+	roster[3] = &tc;
+	roster[4] = &adsf;
+
+	for (int i = 0; i < 5; i++) {
+		roster[i]->displayInfo();
+	}
+}
+
+/*
+
+Inheritance allows you to create new classes ( derived classes/subclasses) based on existing classes (base classes)
+- represents an "is-a" relationship. A Student is a Person, a Staff is a Person,etc. they all share the fundamental characteristics of a person.
+(syntax is class Student : public Person{} : indicates that Student publicly inherits from Person = means that the public members of Person are accessible as public members of Student)
+
+- creating a specialized version of an existing type. 
+(ex:classes like Student, Staff, Teacher, and AdminStaff which are all specialized types of a general Person.)
+
+- Person class acts as the base class. It contains common attributes like name, age, and gender, and a common behavior (function) like displayInfo().
+(classes Student, Staff, Teacher, and AdminStaff are the derived classes which inherit properties and behaviors from the Person class. )
+
+- When a class inherits from another, it automatically gains all the members (data and functions) of the base class. 
+(Student object automatically has name, age, and gender and can call displayInfo() because it inherited from Person.)
+
+- Derived classes can also add their own unique members. 
+(Student adds studentID, major, gpa, and the isHonorStudent() function)
+
+- Derived classes can also override methods from the base class. 
+( displayInfo() method is marked as virtual in the Person base class, and then overridden in the other classes using the keyword: "override")
+(means they provide their own version of how to display information)
+
+- In the overridden displayInfo() methods, all derived classes call the base class's version 
+(used Person::displayInfo() before adding their specific information)
+
+- When creating an object of a derived class, the constructor of the base class is called. 
+(For example, the Student constructor Student(...) uses : Person(n,a,g) to pass the person-specific details to the Person constructor.)
+(This ensures that the base class's part of the object is properly initialized.)
+
+- in main u see how pointers to the base class (Person*) can point to objects of derived classes. 
+(When displayInfo() is called via such a pointer, the appropriate overridden method in the derived class is done.)
+
+*/
+
+
+
+
